@@ -1,0 +1,95 @@
+# devfile v2.0 for WildFl s2i V2. 
+# Relies on WildFly maven plugin 3.0.0.
+commands:
+  # Default build command called on 'odo push'
+- exec:
+    commandLine: mvn ${MVN_ARGS_APPEND} clean package
+    component: wildfly
+    group:
+      isDefault: true
+      kind: build
+    label: Compile and package the application
+    workingDir: $PROJECTS_ROOT
+  id: build
+# Command to be called as the watch build command: 'odo watch --build-command deploy'
+- exec:
+    commandLine: mvn ${MVN_ARGS_APPEND} wildfly:deploy -Dwildfly.package.skip=true
+    component: wildfly
+    group:
+      kind: build
+    label: Compile, package and re-deploy the application 
+    workingDir: $PROJECTS_ROOT
+  id: deploy
+# Run command, starts the server on 'odo push'
+- exec:
+    commandLine: /usr/local/s2i/run
+    component: wildfly
+    group:
+      isDefault: true
+      kind: run
+    hotReloadCapable: true
+    label: Launch WildFly Server
+    workingDir: $PROJECTS_ROOT
+  id: run
+# Run command, starts the server in debug on 'odo push --debug'
+# Make sure to call odo debug port-forward -l 8787 to connect debugger
+- exec:
+    commandLine: /usr/local/s2i/run
+    component: wildfly
+    env:
+    - name: JAVA_OPTS_APPEND
+    # The value used to contain -Dsun.util.logging.disableCallerCheck=true, why?
+      value: -Xrunjdwp:transport=dt_socket,address=0.0.0.0:$DEBUG_PORT,server=y,suspend=n
+    group:
+      isDefault: true
+      kind: debug
+    hotReloadCapable: true
+    label: Launch WildFly Server with debug enabled
+    workingDir: $PROJECTS_ROOT
+  id: debug
+components:
+- container:
+    endpoints:
+    - name: wildfly-http
+      targetPort: 8080
+    env:
+    - name: GC_METASPACE_SIZE
+      value: "96"
+    - name: GC_MAX_METASPACE_SIZE
+      value: "256"
+    - name: JBOSS_HOME
+      value: /projects/target/server
+    - name: MVN_ARGS_APPEND
+      value: -Dmaven.repo.local=/home/jboss/.m2/repository -Dcom.redhat.xpaas.repo.jbossorg -Dmaven.test.skip=true  -Popenshift
+    image: quay.io/jfdenise/wildfly-s2i-jdk11:latest
+    memoryLimit: 1512Mi
+    mountSources: true
+    volumeMounts:
+    - name: m2-repository
+      path: /home/jboss/.m2/repository
+  name: wildfly
+- name: m2-repository
+  volume:
+    size: 3Gi
+metadata:
+  description: Upstream WildFly
+  displayName: WildFly Java
+  icon: https://design.jboss.org/wildfly/logo/final/wildfly_logomark.svg
+  language: java
+  name: java-wildfly-odo-v2-cqkl
+  projectType: wildfly
+  tags:
+  - Java
+  - WildFly
+  version: 1.0.4
+  website: https://wildfly.org
+schemaVersion: 2.0.0
+starterProjects:
+- description: WildFly Eclipse Microprofile Config Quickstart
+  git:
+    checkoutFrom:
+      remote: wildfly-quickstart
+      revision: main
+    remotes:
+      wildfly-quickstart: https://github.com/jfdenise/odo-v2-qs.git
+  name: microprofile-config
