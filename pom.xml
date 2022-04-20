@@ -22,14 +22,14 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <!-- The versions for BOMs, Dependencies and Plugins -->
-        <version.microprofile.bom>25.0.0.Final</version.microprofile.bom>
-        <version.server.bom>25.0.0.Final</version.server.bom>
-        <version.server.bootable-jar>25.0.0.Final</version.server.bootable-jar>
+        <version.microprofile.bom>26.1.0.Final</version.microprofile.bom>
+        <version.server.bom>26.1.0.Final</version.server.bom>
+        <version.server.bootable-jar>26.1.0.Final</version.server.bootable-jar>
         <version.wildfly-jar.maven.plugin>5.0.0.Final</version.wildfly-jar.maven.plugin>
         <version.jkube.maven.plugin>1.0.1</version.jkube.maven.plugin>
         <jkube.generator.from>registry.redhat.io/ubi8/openjdk-11:latest</jkube.generator.from>
-        <version.wildfly>25.0.1.Final</version.wildfly>
-        <version.wildfly.plugin>3.0.0.Alpha3</version.wildfly.plugin>
+        <version.wildfly>26.1.0.Final</version.wildfly>
+        <version.wildfly.plugin>3.0.0.Final</version.wildfly.plugin>
         <plugin.fork.embedded>true</plugin.fork.embedded>
     </properties>
 

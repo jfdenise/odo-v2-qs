@@ -1,4 +1,4 @@
-# devfile v2.0 for WildFl s2i V2. 
+# devfile v2.0 for WildFly s2i V2. 
 # Relies on WildFly maven plugin 3.0.0.
 commands:
   # Default build command called on 'odo push'
@@ -8,12 +8,12 @@ commands:
     group:
       isDefault: true
       kind: build
-    label: Compile and package the application
+    label: Compile, package the application, provision the WildFly server, deploy the application.
     workingDir: $PROJECTS_ROOT
   id: build
 # Command to be called as the watch build command: 'odo watch --build-command deploy'
 - exec:
-    commandLine: mvn ${MVN_ARGS_APPEND} wildfly:deploy -Dwildfly.package.skip=true
+    commandLine: mvn ${MVN_ARGS_APPEND} wildfly:deploy
     component: wildfly
     group:
       kind: build
@@ -22,19 +22,18 @@ commands:
   id: deploy
 # Run command, starts the server on 'odo push'
 - exec:
-    commandLine: /usr/local/s2i/run
+    commandLine: rm -rf ${JBOSS_HOME} && cp -r ${WILDFLY_PROVISIONED_SERVER} ${JBOSS_HOME} && /usr/local/s2i/run
     component: wildfly
     group:
       isDefault: true
       kind: run
     hotReloadCapable: true
     label: Launch WildFly Server
-    workingDir: $PROJECTS_ROOT
   id: run
 # Run command, starts the server in debug on 'odo push --debug'
 # Make sure to call odo debug port-forward -l 8787 to connect debugger
 - exec:
-    commandLine: /usr/local/s2i/run
+    commandLine: rm -rf ${JBOSS_HOME} && cp -r ${WILDFLY_PROVISIONED_SERVER} ${JBOSS_HOME} && /usr/local/s2i/run
     component: wildfly
     env:
     - name: JAVA_OPTS_APPEND
@@ -45,7 +44,6 @@ commands:
       kind: debug
     hotReloadCapable: true
     label: Launch WildFly Server with debug enabled
-    workingDir: $PROJECTS_ROOT
   id: debug
 components:
 - container:
@@ -53,15 +51,11 @@ components:
     - name: wildfly-http
       targetPort: 8080
     env:
-    - name: GC_METASPACE_SIZE
-      value: "96"
-    - name: GC_MAX_METASPACE_SIZE
-      value: "256"
-    - name: JBOSS_HOME
+    - name: WILDFLY_PROVISIONED_SERVER
       value: /projects/target/server
     - name: MVN_ARGS_APPEND
       value: -Dmaven.repo.local=/home/jboss/.m2/repository -Dcom.redhat.xpaas.repo.jbossorg -Dmaven.test.skip=true  -Popenshift
-    image: quay.io/jfdenise/wildfly-s2i-jdk11:latest
+    image: quay.io/wildfly/wildfly-s2i-jdk11:latest
     memoryLimit: 1512Mi
     mountSources: true
     volumeMounts:
